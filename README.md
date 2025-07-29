@@ -4,11 +4,17 @@ This branch focuses on **setting up the initial UI flow** using **placeholder as
 
 ---
 
+## 🔧 UI Reference
+
+![image](https://github.com/Imran1720/Tower_Defense/blob/63fb9c9d17632b0ba1aec2d01d5626ff18ad2e93/References/TOWER%20DEFENCE%20UI.jpg)
+
+---
+
 ## 🔧 Features in Progress
 
 - 🎮 **Main Menu Layout**
   - Start Game
-  - Options
+  - Armory
   - Exit
 
 - 🧱 **Placeholder UI Elements**
