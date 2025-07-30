@@ -1,4 +1,3 @@
-using System;
 using TowerDefence.Tile;
 using UnityEngine;
 namespace TowerDefence.Level
@@ -19,6 +18,9 @@ namespace TowerDefence.Level
         private Vector3 startOffset;
         private Transform tileContainer;
 
+        [Header("Editor Details")]
+        [SerializeField] private int buttonSize;
+        [SerializeField] private int brushButtonSize;
         private void Start()
         {
             SpawnTiles();
@@ -26,6 +28,8 @@ namespace TowerDefence.Level
 
         public void SpawnTiles()
         {
+            DeleteTileContainer();
+
             startOffset = new Vector3((numberOfHorizontalTiles / 2), transform.position.y, (numberOfVerticalTiles / 2));
             startPosition = new Vector3(transform.position.x - startOffset.x, transform.position.y, transform.position.z - startOffset.z);
             SpawnTileContainer();
@@ -48,9 +52,20 @@ namespace TowerDefence.Level
                     return GetTileOfType(TileType.ROAD);
 
                 case TileType.TREE_1:
+                    return GetTileOfType(TileType.TREE_1);
                 case TileType.TREE_2:
+                    return GetTileOfType(TileType.TREE_2);
                 case TileType.TREE_3:
-                    return GetRandomTreeTile();
+                    return GetTileOfType(TileType.TREE_3);
+
+                case TileType.WATER:
+                    return GetTileOfType(TileType.WATER);
+
+                case TileType.ROCK:
+                    return GetTileOfType(TileType.ROCK);
+
+                case TileType.SHRUB:
+                    return GetTileOfType(TileType.SHRUB);
 
                 case TileType.GRASS:
                 default:
@@ -59,10 +74,7 @@ namespace TowerDefence.Level
             }
         }
 
-        private GameObject GetRandomTreeTile()
-        {
-            throw new NotImplementedException();
-        }
+
 
         private void SpawnTileContainer()
         {
@@ -70,14 +82,25 @@ namespace TowerDefence.Level
             tileContainer.transform.SetParent(transform, false);
         }
 
-        private void DeleteTileContainer() => Destroy(tileContainer.gameObject);
+        private void DeleteTileContainer()
+        {
+            if (tileContainer == null)
+                return;
+            DestroyImmediate(tileContainer.gameObject);
+        }
         private Vector3 GetTileSpawnPosition(int x, int z)
         {
             return startPosition + new Vector3(x, 0, z);
         }
 
-        public void CreateTileArray() => tileTypeArray = new TileType[numberOfHorizontalTiles, numberOfVerticalTiles];
-
+        public void CreateTileArray()
+        {
+            if (numberOfVerticalTiles == 0 || numberOfHorizontalTiles == 0)
+            {
+                return;
+            }
+            tileTypeArray = new TileType[numberOfHorizontalTiles, numberOfVerticalTiles];
+        }
         private GameObject GetTileOfType(TileType tileType)
         {
             TileTypeData data = tileListSO.tileTypesList.Find(item => item.tileType == tileType);
@@ -85,6 +108,47 @@ namespace TowerDefence.Level
                 return null;
 
             return data.tilePrefab;
+        }
+
+        public void ClearLevel()
+        {
+            ResetTileArray();
+            DeleteTileContainer();
+        }
+
+        private void ResetTileArray()
+        {
+            if (tileTypeArray == null)
+            {
+                return;
+            }
+            for (int i = 0; i < numberOfHorizontalTiles; i++)
+            {
+                for (int j = 0; j < numberOfVerticalTiles; j++)
+                {
+                    tileTypeArray[i, j] = TileType.GRASS;
+                }
+            }
+        }
+
+        //GETTERS
+        public bool IsTileArrayEmpty() => tileTypeArray == null;
+
+        public int GetButtonCountInRow() => numberOfHorizontalTiles;
+        public int GetButtonCountInColumn() => numberOfVerticalTiles;
+        public int GetBrushButtonSize() => brushButtonSize;
+        public int GetButtonSize() => buttonSize;
+
+        public TileType GetTileTypeOf(int x, int y)
+        {
+            return tileTypeArray[x, y];
+        }
+
+
+        //SETTER
+        public void SetTileValue(int x, int y, TileType tileType)
+        {
+            tileTypeArray[x, y] = tileType;
         }
     }
 #endif

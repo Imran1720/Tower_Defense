@@ -27,3 +27,5 @@ MonoBehaviour:
     tilePrefab: {fileID: 919132149155446097, guid: a68df37d37ae7ab468f2295572874fff, type: 3}
   - tileType: 6
     tilePrefab: {fileID: 919132149155446097, guid: 8a2da2c8c6fd3134eb57f77885aa14bd, type: 3}
+  - tileType: 2
+    tilePrefab: {fileID: 919132149155446097, guid: 099e916014490cd4690b1a3fc3154ec7, type: 3}

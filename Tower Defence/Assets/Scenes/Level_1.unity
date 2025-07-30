@@ -376,8 +376,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc902624d2b66cc4387b9fcbe77d81b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  numberOfVerticalTiles: 0
-  numberOfHorizontalTiles: 0
+  numberOfVerticalTiles: 5
+  numberOfHorizontalTiles: 5
+  tileContainerPrefab: {fileID: 1463875116726802061, guid: 102dc8f9251a98c4b92233f04d2d4d1c, type: 3}
+  tileListSO: {fileID: 11400000, guid: 2f9f115f7461c3e47b4cfae38ce4ec08, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
