@@ -51,12 +51,8 @@ namespace TowerDefence.Level
                 case TileType.ROAD:
                     return GetTileOfType(TileType.ROAD);
 
-                case TileType.TREE_1:
-                    return GetTileOfType(TileType.TREE_1);
-                case TileType.TREE_2:
-                    return GetTileOfType(TileType.TREE_2);
-                case TileType.TREE_3:
-                    return GetTileOfType(TileType.TREE_3);
+                case TileType.TREE:
+                    return GetTileOfType(GetRandomTreeTile());
 
                 case TileType.WATER:
                     return GetTileOfType(TileType.WATER);
@@ -74,7 +70,21 @@ namespace TowerDefence.Level
             }
         }
 
+        private TileType GetRandomTreeTile()
+        {
+            int treeCount = Random.Range(1, 4);
 
+            switch (treeCount)
+            {
+                case 3:
+                    return TileType.TREE_3;
+                case 2:
+                    return TileType.TREE_2;
+                case 1:
+                default:
+                    return TileType.TREE_1;
+            }
+        }
 
         private void SpawnTileContainer()
         {

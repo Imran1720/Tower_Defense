@@ -6,6 +6,7 @@ namespace TowerDefence.Tile
         GRASS,
         ROAD,
         WATER,
+        TREE,
         TREE_1,
         TREE_2,
         TREE_3,

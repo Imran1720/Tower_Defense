@@ -84,7 +84,7 @@ public class LevelGeneratorEditor : Editor
 
         if (GUILayout.Button("Draw Tree", GUILayout.Width(brushButtonSize * 2), GUILayout.Height(brushButtonSize)))
         {
-            SetTileToDraw(GetRandomTreeTile());
+            SetTileToDraw(TileType.TREE);
         }
 
         if (GUILayout.Button("Draw Shrub", GUILayout.Width(brushButtonSize * 2), GUILayout.Height(brushButtonSize)))
@@ -126,9 +126,7 @@ public class LevelGeneratorEditor : Editor
                 return Color.red;
             case TileType.WATER:
                 return Color.cyan;
-            case TileType.TREE_1:
-            case TileType.TREE_2:
-            case TileType.TREE_3:
+            case TileType.TREE:
                 return Color.yellow;
             case TileType.ROCK:
                 return Color.grey;
@@ -137,21 +135,7 @@ public class LevelGeneratorEditor : Editor
         }
     }
 
-    private TileType GetRandomTreeTile()
-    {
-        int treeCount = Random.Range(1, 4);
 
-        switch (treeCount)
-        {
-            case 3:
-                return TileType.TREE_3;
-            case 2:
-                return TileType.TREE_2;
-            case 1:
-            default:
-                return TileType.TREE_1;
-        }
-    }
 
     private void InitializeEditorData()
     {
