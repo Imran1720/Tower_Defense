@@ -18,14 +18,14 @@ MonoBehaviour:
   - tileType: 1
     tilePrefab: {fileID: 919132149155446097, guid: d8b8114fb58c3274a9f4a1995c3d792b, type: 3}
   - tileType: 3
-    tilePrefab: {fileID: 919132149155446097, guid: 1025f1b21fcd391468f3d5362a693353, type: 3}
-  - tileType: 4
-    tilePrefab: {fileID: 919132149155446097, guid: e0881814f54217446982563a785dfe23, type: 3}
-  - tileType: 5
-    tilePrefab: {fileID: 919132149155446097, guid: 92f770e1791907246bcc52258688892e, type: 3}
-  - tileType: 7
-    tilePrefab: {fileID: 919132149155446097, guid: a68df37d37ae7ab468f2295572874fff, type: 3}
-  - tileType: 6
-    tilePrefab: {fileID: 919132149155446097, guid: 8a2da2c8c6fd3134eb57f77885aa14bd, type: 3}
-  - tileType: 2
     tilePrefab: {fileID: 919132149155446097, guid: 099e916014490cd4690b1a3fc3154ec7, type: 3}
+  - tileType: 5
+    tilePrefab: {fileID: 919132149155446097, guid: 1025f1b21fcd391468f3d5362a693353, type: 3}
+  - tileType: 6
+    tilePrefab: {fileID: 919132149155446097, guid: e0881814f54217446982563a785dfe23, type: 3}
+  - tileType: 7
+    tilePrefab: {fileID: 919132149155446097, guid: 92f770e1791907246bcc52258688892e, type: 3}
+  - tileType: 8
+    tilePrefab: {fileID: 919132149155446097, guid: 8a2da2c8c6fd3134eb57f77885aa14bd, type: 3}
+  - tileType: 9
+    tilePrefab: {fileID: 919132149155446097, guid: a68df37d37ae7ab468f2295572874fff, type: 3}

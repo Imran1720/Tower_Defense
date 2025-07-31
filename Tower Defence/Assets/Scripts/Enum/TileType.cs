@@ -5,6 +5,7 @@ namespace TowerDefence.Tile
     {
         GRASS,
         ROAD,
+        WAYPOINT,
         WATER,
         TREE,
         TREE_1,

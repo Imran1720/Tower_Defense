@@ -63,14 +63,23 @@ public class LevelGeneratorEditor : Editor
             SetTileToDraw(TileType.GRASS);
         }
 
+        if (GUILayout.Button("Draw Water", GUILayout.Width(brushButtonSize * 2), GUILayout.Height(brushButtonSize)))
+        {
+            SetTileToDraw(TileType.WATER);
+        }
+
+        EditorGUILayout.EndHorizontal();
+        EditorGUILayout.Space(20);
+        EditorGUILayout.BeginHorizontal();
+
         if (GUILayout.Button("Draw Road", GUILayout.Width(brushButtonSize * 2), GUILayout.Height(brushButtonSize)))
         {
             SetTileToDraw(TileType.ROAD);
         }
 
-        if (GUILayout.Button("Draw Water", GUILayout.Width(brushButtonSize * 2), GUILayout.Height(brushButtonSize)))
+        if (GUILayout.Button("Draw Waypoint", GUILayout.Width(brushButtonSize * 2), GUILayout.Height(brushButtonSize)))
         {
-            SetTileToDraw(TileType.WATER);
+            SetTileToDraw(TileType.WAYPOINT);
         }
 
         EditorGUILayout.EndHorizontal();
@@ -96,7 +105,7 @@ public class LevelGeneratorEditor : Editor
         EditorGUILayout.Space(20);
 
 
-        EditorGUILayout.BeginHorizontal();
+
 
         if (GUILayout.Button("Generate Level"))
         {
@@ -106,8 +115,11 @@ public class LevelGeneratorEditor : Editor
         {
             levelGenerator.ClearLevel();
         }
+        if (GUILayout.Button("Delete Level"))
+        {
+            levelGenerator.DeleteLevel();
+        }
 
-        EditorGUILayout.EndHorizontal();
     }
 
     private void SetTileToDraw(TileType type)
@@ -124,6 +136,8 @@ public class LevelGeneratorEditor : Editor
                 return Color.green;
             case TileType.ROAD:
                 return Color.red;
+            case TileType.WAYPOINT:
+                return Color.black;
             case TileType.WATER:
                 return Color.cyan;
             case TileType.TREE:
