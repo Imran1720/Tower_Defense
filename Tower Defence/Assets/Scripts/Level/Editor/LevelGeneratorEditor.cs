@@ -13,6 +13,7 @@ public class LevelGeneratorEditor : Editor
     private LevelGenerator levelGenerator;
     private TileType tileTypeToSet;
     private TileType currenttileType;
+    private bool canHoverDraw = false;
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
@@ -47,6 +48,14 @@ public class LevelGeneratorEditor : Editor
                     levelGenerator.SetTileValue(i, j, tileTypeToSet);
                     EditorUtility.SetDirty(levelGenerator);
                     Repaint();
+                }
+
+                Rect buttonRect = GUILayoutUtility.GetLastRect();
+                Vector2 mousePosition = Event.current.mousePosition;
+
+                if (buttonRect.Contains(mousePosition) && canHoverDraw)
+                {
+                    levelGenerator.SetTileValue(i, j, tileTypeToSet);
                 }
             }
             EditorGUILayout.EndHorizontal();
@@ -104,7 +113,10 @@ public class LevelGeneratorEditor : Editor
         EditorGUILayout.EndHorizontal();
         EditorGUILayout.Space(20);
 
-
+        if (GUILayout.Button("Togle Hover Draw"))
+        {
+            canHoverDraw = !canHoverDraw;
+        }
 
 
         if (GUILayout.Button("Generate Level"))
