@@ -9,8 +9,6 @@ namespace TowerDefence.Level
         [Header("Grid Details")]
         [SerializeField] private int numberOfVerticalTiles;
         [SerializeField] private int numberOfHorizontalTiles;
-        [SerializeField] private Transform tileContainerPrefab;
-        [SerializeField] private Transform waypointContainerPrefab;
         [SerializeField] private Transform waypointPrefab;
         [SerializeField] private float waypointOffset;
         [SerializeField] private float tileOffset;
@@ -22,21 +20,25 @@ namespace TowerDefence.Level
         private List<Vector3Int> waypoinGridPositionList = new List<Vector3Int>();
         private Vector3 startPosition;
         private Vector3 startOffset;
+        private List<Transform> waypointPositionList;
 
-        [SerializeField] private Transform tileContainer;
-        [SerializeField] private Transform waypointContainer;
+        private Transform levelContainer;
+        private Transform waypointContainer;
 
         [Header("Editor Details")]
         [SerializeField] private int buttonSize;
         [SerializeField] private int brushButtonSize;
 
+        [Header("Editor Details")]
+        [SerializeField] private GameService gameService;
+
         public void SpawnTiles()
         {
             DeleteTileContainer();
+            SetContainers();
 
             startOffset = new Vector3((numberOfHorizontalTiles / 2), transform.position.y, (numberOfVerticalTiles / 2));
             startPosition = new Vector3(transform.position.x - startOffset.x, transform.position.y, transform.position.z - startOffset.z);
-            SpawnTileContainer();
 
             for (int i = 0; i < numberOfHorizontalTiles; i++)
             {
@@ -47,12 +49,26 @@ namespace TowerDefence.Level
             }
 
             SpawnWayPoint();
+
+            SetLevelData();
+
+        }
+
+        private void SetContainers()
+        {
+            levelContainer = gameService.GetLevelContainer();
+            waypointContainer = gameService.GetWaypointContainer();
+        }
+
+        private void SetLevelData()
+        {
+            gameService.SetWaypoints(waypointPositionList);
         }
 
         private void SpawnTile(int i, int j)
         {
             GameObject spawnedObject = Instantiate(GetPrefabToSpawn(i, j), GetTileSpawnPosition(i, j), Quaternion.identity);
-            spawnedObject.transform.SetParent(tileContainer, false);
+            spawnedObject.transform.SetParent(levelContainer, false);
 
         }
 
@@ -99,20 +115,39 @@ namespace TowerDefence.Level
             }
         }
 
-        private void SpawnTileContainer()
-        {
-            tileContainer = Instantiate(tileContainerPrefab, transform.position, Quaternion.identity);
-            //tileContainer.transform.SetParent(transform, false);
-            waypointContainer = Instantiate(waypointContainerPrefab, transform.position, Quaternion.identity);
-        }
 
         private void DeleteTileContainer()
         {
-            if (tileContainer != null)
-                DestroyImmediate(tileContainer.gameObject);
+            if (levelContainer != null)
+            {
+                Debug.Log(levelContainer.childCount);
+                List<Transform> childrenlist = new List<Transform>();
+
+                foreach (Transform child in levelContainer)
+                {
+                    childrenlist.Add(child);
+                }
+                foreach (Transform child in childrenlist)
+                {
+                    DestroyImmediate(child.gameObject);
+                }
+                Debug.Log(levelContainer.childCount);
+
+            }
 
             if (waypointContainer != null)
-                DestroyImmediate(waypointContainer.gameObject);
+            {
+                List<Transform> childrenlist = new List<Transform>();
+
+                foreach (Transform child in waypointContainer)
+                {
+                    childrenlist.Add(child);
+                }
+                foreach (Transform child in childrenlist)
+                {
+                    DestroyImmediate(child.gameObject);
+                }
+            }
         }
         private Vector3 GetTileSpawnPosition(int x, int z)
         {
@@ -200,13 +235,12 @@ namespace TowerDefence.Level
             foreach (Vector3Int pos in waypoinGridPositionList)
             {
                 Vector3 gridWorldPosition = GetTileSpawnPosition(pos.x, pos.z);
-                Debug.Log("grid:" + gridWorldPosition);
 
                 Vector3 spawnPosition = new Vector3(gridWorldPosition.x, gridWorldPosition.y + waypointOffset, gridWorldPosition.z);
-                Debug.Log("grid:" + spawnPosition);
 
                 Transform waypoint = Instantiate(waypointPrefab, spawnPosition, Quaternion.identity);
                 waypoint.SetParent(waypointContainer, false);
+                waypointPositionList.Add(waypoint);
             }
         }
     }

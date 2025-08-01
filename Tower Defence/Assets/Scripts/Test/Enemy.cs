@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ public class Enemy : MonoBehaviour
     [SerializeField] private Rigidbody rb;
     [SerializeField] private float moveSpeed;
     [SerializeField] private float rotationSpeed;
-    [SerializeField] private List<Transform> checkpointList;
+    private List<Transform> checkpointList;
 
     private Transform target;
 
@@ -14,7 +15,19 @@ public class Enemy : MonoBehaviour
 
     private void Start()
     {
+        SetCheckpoints();
         AssignTarget();
+    }
+
+    private void SetCheckpoints()
+    {
+        checkpointList = new List<Transform>();
+        List<Transform> waypointList = GameService.instance.GetWaypoints();
+
+        foreach (Transform point in waypointList)
+        {
+            checkpointList.Add(point);
+        }
     }
 
     private void Update()
