@@ -1,247 +1,188 @@
 using System.Collections.Generic;
 using TowerDefence.Tile;
+using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 namespace TowerDefence.Level
 {
 #if UNITY_EDITOR
     public class LevelGenerator : MonoBehaviour
     {
-        [Header("Grid Details")]
+        [Header("Grid Configuration")]
         [SerializeField] private int numberOfVerticalTiles;
         [SerializeField] private int numberOfHorizontalTiles;
-        [SerializeField] private Transform waypointPrefab;
-        [SerializeField] private float waypointOffset;
         [SerializeField] private float tileOffset;
 
-        [Header("Tile Details")]
+        [Header("Waypoints")]
+        [SerializeField] private Transform waypointPrefab;
+        [SerializeField] private float waypointOffset;
+        private List<Vector3Int> waypointGridPositions = new();
+        [SerializeField, HideInInspector] private List<Transform> waypointInstances;
+
+        [Header("Tile Configuration")]
         [SerializeField] private TileListSO tileListSO;
 
-        private TileType[,] tileTypeArray;
-        private List<Vector3Int> waypoinGridPositionList = new List<Vector3Int>();
-        private Vector3 startPosition;
-        private Vector3 startOffset;
-        private List<Transform> waypointPositionList;
+        [Header("Editor Configuration")]
+        [SerializeField] private int buttonSize;
+        [SerializeField] private int brushButtonSize;
+        [SerializeField] private GameService gameService;
 
+        private TileType[,] tileArray;
+        private Vector3 startPosition;
+        private Vector3 offsetOrigin;
         private Transform levelContainer;
         private Transform waypointContainer;
 
-        [Header("Editor Details")]
-        [SerializeField] private int buttonSize;
-        [SerializeField] private int brushButtonSize;
-
-        [Header("Editor Details")]
-        [SerializeField] private GameService gameService;
+        public void CreateTileArray()
+        {
+            if (numberOfHorizontalTiles <= 0 || numberOfVerticalTiles <= 0) return;
+            tileArray = new TileType[numberOfHorizontalTiles, numberOfVerticalTiles];
+        }
 
         public void SpawnTiles()
         {
-            DeleteTileContainer();
+            DeleteContainers();
             SetContainers();
 
-            startOffset = new Vector3((numberOfHorizontalTiles / 2), transform.position.y, (numberOfVerticalTiles / 2));
-            startPosition = new Vector3(transform.position.x - startOffset.x, transform.position.y, transform.position.z - startOffset.z);
+            offsetOrigin = new Vector3(numberOfHorizontalTiles / 2f, transform.position.y, numberOfVerticalTiles / 2f);
+            startPosition = new Vector3(transform.position.x - offsetOrigin.x, transform.position.y, transform.position.z - offsetOrigin.z);
 
-            for (int i = 0; i < numberOfHorizontalTiles; i++)
+            for (int x = 0; x < numberOfHorizontalTiles; x++)
             {
-                for (int j = 0; j < numberOfVerticalTiles; j++)
+                for (int z = 0; z < numberOfVerticalTiles; z++)
                 {
-                    SpawnTile(i, j);
+                    SpawnTile(x, z);
                 }
             }
 
-            SpawnWayPoint();
+            SpawnWaypoints();
+        }
 
-            SetLevelData();
+        public void ClearLevel()
+        {
+            ResetTileArray();
+            DeleteContainers();
+        }
 
+        public void DeleteLevel()
+        {
+            ResetTileArray();
+            tileArray = null;
+            DeleteContainers();
+            waypointGridPositions.Clear();
+        }
+
+        public bool IsTileArrayEmpty() => tileArray == null;
+        public int GetButtonCountInRow() => numberOfHorizontalTiles;
+        public int GetButtonCountInColumn() => numberOfVerticalTiles;
+        public int GetBrushButtonSize() => brushButtonSize;
+        public int GetButtonSize() => buttonSize;
+        public TileType GetTileTypeAt(int x, int y) => tileArray[x, y];
+
+        public void SetTileType(int x, int y, TileType type)
+        {
+            tileArray[x, y] = type;
+        }
+
+        public void AddWaypointPosition(Vector3Int position)
+        {
+            waypointGridPositions.Add(position);
+        }
+
+        private void SpawnTile(int x, int z)
+        {
+            GameObject prefab = GetTilePrefabToSpawn(x, z);
+            if (prefab == null) return;
+
+            GameObject instance = Instantiate(prefab, GetTileSpawnPosition(x, z), Quaternion.identity);
+            instance.transform.SetParent(levelContainer, false);
+        }
+
+        private GameObject GetTilePrefabToSpawn(int x, int z)
+        {
+            TileType type = tileArray[x, z];
+            return type switch
+            {
+                TileType.ROAD or TileType.WAYPOINT => GetPrefabOfType(TileType.ROAD),
+                TileType.TREE => GetPrefabOfType(GetRandomTreeVariant()),
+                TileType.WATER => GetPrefabOfType(TileType.WATER),
+                TileType.ROCK => GetPrefabOfType(TileType.ROCK),
+                TileType.SHRUB => GetPrefabOfType(TileType.SHRUB),
+                TileType.GRASS or _ => GetPrefabOfType(TileType.GRASS),
+            };
+        }
+
+        private TileType GetRandomTreeVariant()
+        {
+            return (TileType)Random.Range((int)TileType.TREE_1, (int)TileType.TREE_3 + 1);
+        }
+
+        private GameObject GetPrefabOfType(TileType type)
+        {
+            TileTypeData data = tileListSO.tileTypesList.Find(item => item.tileType == type);
+            return data?.tilePrefab;
+        }
+
+        private Vector3 GetTileSpawnPosition(int x, int z)
+        {
+            Vector3 gridOffset = new Vector3(x * tileOffset, 0, z * tileOffset);
+            return startPosition + new Vector3(x, 0, z) + gridOffset;
+        }
+
+        private void ResetTileArray()
+        {
+            if (tileArray == null) return;
+
+            for (int x = 0; x < numberOfHorizontalTiles; x++)
+            {
+                for (int z = 0; z < numberOfVerticalTiles; z++)
+                {
+                    tileArray[x, z] = TileType.GRASS;
+                }
+            }
+
+            waypointGridPositions.Clear();
+        }
+
+        private void SpawnWaypoints()
+        {
+            foreach (Vector3Int pos in waypointGridPositions)
+            {
+                Vector3 basePos = GetTileSpawnPosition(pos.x, pos.z);
+                Vector3 spawnPos = new Vector3(basePos.x, basePos.y + waypointOffset, basePos.z);
+
+                Transform waypoint = Instantiate(waypointPrefab, spawnPos, Quaternion.identity);
+                waypoint.SetParent(waypointContainer, false);
+                waypointInstances.Add(waypoint);
+
+                EditorUtility.SetDirty(this);
+                EditorSceneManager.MarkSceneDirty(gameObject.scene);
+            }
         }
 
         private void SetContainers()
         {
             levelContainer = gameService.GetLevelContainer();
             waypointContainer = gameService.GetWaypointContainer();
+            waypointInstances = new List<Transform>();
         }
 
-        private void SetLevelData()
+        private void DeleteContainers()
         {
-            gameService.SetWaypoints(waypointPositionList);
+            DeleteChildren(levelContainer);
+            DeleteChildren(waypointContainer);
         }
 
-        private void SpawnTile(int i, int j)
+        private void DeleteChildren(Transform parent)
         {
-            GameObject spawnedObject = Instantiate(GetPrefabToSpawn(i, j), GetTileSpawnPosition(i, j), Quaternion.identity);
-            spawnedObject.transform.SetParent(levelContainer, false);
+            if (parent == null) return;
 
-        }
+            List<Transform> children = new();
+            foreach (Transform child in parent)
+                children.Add(child);
 
-        private GameObject GetPrefabToSpawn(int x, int y)
-        {
-            switch (tileTypeArray[x, y])
-            {
-                case TileType.ROAD:
-                case TileType.WAYPOINT:
-                    return GetTileOfType(TileType.ROAD);
-
-                case TileType.TREE:
-                    return GetTileOfType(GetRandomTreeTile());
-
-                case TileType.WATER:
-                    return GetTileOfType(TileType.WATER);
-
-                case TileType.ROCK:
-                    return GetTileOfType(TileType.ROCK);
-
-                case TileType.SHRUB:
-                    return GetTileOfType(TileType.SHRUB);
-
-                case TileType.GRASS:
-                default:
-                    return GetTileOfType(TileType.GRASS);
-
-            }
-        }
-
-        private TileType GetRandomTreeTile()
-        {
-            int treeCount = Random.Range(1, 4);
-
-            switch (treeCount)
-            {
-                case 3:
-                    return TileType.TREE_3;
-                case 2:
-                    return TileType.TREE_2;
-                case 1:
-                default:
-                    return TileType.TREE_1;
-            }
-        }
-
-
-        private void DeleteTileContainer()
-        {
-            if (levelContainer != null)
-            {
-                Debug.Log(levelContainer.childCount);
-                List<Transform> childrenlist = new List<Transform>();
-
-                foreach (Transform child in levelContainer)
-                {
-                    childrenlist.Add(child);
-                }
-                foreach (Transform child in childrenlist)
-                {
-                    DestroyImmediate(child.gameObject);
-                }
-                Debug.Log(levelContainer.childCount);
-
-            }
-
-            if (waypointContainer != null)
-            {
-                List<Transform> childrenlist = new List<Transform>();
-
-                foreach (Transform child in waypointContainer)
-                {
-                    childrenlist.Add(child);
-                }
-                foreach (Transform child in childrenlist)
-                {
-                    DestroyImmediate(child.gameObject);
-                }
-            }
-        }
-        private Vector3 GetTileSpawnPosition(int x, int z)
-        {
-            Vector3 pos = (startPosition + new Vector3(x, 0, z)) + new Vector3(x * tileOffset, 0, z * tileOffset);
-            if (tileTypeArray[x, z] == TileType.WAYPOINT)
-            {
-                Debug.Log(startPosition);
-                Debug.Log(x + " " + z);
-                Debug.Log(x * tileOffset + " " + z * tileOffset);
-                Debug.Log(pos);
-            }
-
-            return pos;
-        }
-
-        public void CreateTileArray()
-        {
-            if (numberOfVerticalTiles == 0 || numberOfHorizontalTiles == 0)
-            {
-                return;
-            }
-            tileTypeArray = new TileType[numberOfHorizontalTiles, numberOfVerticalTiles];
-        }
-        private GameObject GetTileOfType(TileType tileType)
-        {
-            TileTypeData data = tileListSO.tileTypesList.Find(item => item.tileType == tileType);
-            if (data == null)
-                return null;
-
-            return data.tilePrefab;
-        }
-
-        public void ClearLevel()
-        {
-            ResetTileArray();
-            DeleteTileContainer();
-        }
-        public void DeleteLevel()
-        {
-            ResetTileArray();
-            tileTypeArray = null;
-            DeleteTileContainer();
-            waypoinGridPositionList.Clear();
-        }
-
-        private void ResetTileArray()
-        {
-            if (tileTypeArray == null)
-            {
-                return;
-            }
-            for (int i = 0; i < numberOfHorizontalTiles; i++)
-            {
-                for (int j = 0; j < numberOfVerticalTiles; j++)
-                {
-                    tileTypeArray[i, j] = TileType.GRASS;
-                }
-            }
-
-            waypoinGridPositionList.Clear();
-        }
-
-        //GETTERS
-        public bool IsTileArrayEmpty() => tileTypeArray == null;
-
-        public int GetButtonCountInRow() => numberOfHorizontalTiles;
-        public int GetButtonCountInColumn() => numberOfVerticalTiles;
-        public int GetBrushButtonSize() => brushButtonSize;
-        public int GetButtonSize() => buttonSize;
-        public TileType GetTileTypeOf(int x, int y) => tileTypeArray[x, y];
-
-        //SETTER
-        public void SetTileValue(int x, int y, TileType tileType)
-        {
-            tileTypeArray[x, y] = tileType;
-        }
-
-        public void AddWaypointPosition(Vector3Int position)
-        {
-            waypoinGridPositionList.Add(position);
-        }
-        public void SpawnWayPoint()
-        {
-            //Debug.Log(waypoinGridPositionList.Count);
-            foreach (Vector3Int pos in waypoinGridPositionList)
-            {
-                Vector3 gridWorldPosition = GetTileSpawnPosition(pos.x, pos.z);
-
-                Vector3 spawnPosition = new Vector3(gridWorldPosition.x, gridWorldPosition.y + waypointOffset, gridWorldPosition.z);
-
-                Transform waypoint = Instantiate(waypointPrefab, spawnPosition, Quaternion.identity);
-                waypoint.SetParent(waypointContainer, false);
-                waypointPositionList.Add(waypoint);
-            }
+            foreach (Transform child in children)
+                DestroyImmediate(child.gameObject);
         }
     }
 #endif

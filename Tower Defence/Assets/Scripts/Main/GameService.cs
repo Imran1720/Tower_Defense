@@ -7,7 +7,7 @@ public class GameService : MonoBehaviour
 
     [SerializeField] private Transform levelContainer;
     [SerializeField] private Transform waypointContainer;
-    [SerializeField] private List<Transform> waypointList = new List<Transform>();
+    [SerializeField] private List<Transform> waypointList;
 
     private void Awake()
     {
@@ -18,11 +18,5 @@ public class GameService : MonoBehaviour
     }
     public Transform GetLevelContainer() => levelContainer;
     public Transform GetWaypointContainer() => waypointContainer;
-
-    public void SetWaypoints(List<Transform> waypoints)
-    {
-        waypointList = waypoints;
-    }
-
     public List<Transform> GetWaypoints() => waypointList;
 }
