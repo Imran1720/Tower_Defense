@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TowerDefence.Tile;
 using UnityEngine;
 namespace TowerDefence.Level
@@ -17,12 +18,13 @@ namespace TowerDefence.Level
         [Header("Tile Details")]
         [SerializeField] private TileListSO tileListSO;
 
-        [SerializeField, HideInInspector] private TileType[,] tileTypeArray;
+        private TileType[,] tileTypeArray;
+        private List<Vector3Int> waypoinGridPositionList = new List<Vector3Int>();
         private Vector3 startPosition;
         private Vector3 startOffset;
 
-        [SerializeField, HideInInspector] private Transform tileContainer;
-        [SerializeField, HideInInspector] private Transform waypointContainer;
+        [SerializeField] private Transform tileContainer;
+        [SerializeField] private Transform waypointContainer;
 
         [Header("Editor Details")]
         [SerializeField] private int buttonSize;
@@ -43,17 +45,15 @@ namespace TowerDefence.Level
                     SpawnTile(i, j);
                 }
             }
+
+            SpawnWayPoint();
         }
 
         private void SpawnTile(int i, int j)
         {
-            GameObject spawnedObject = Instantiate(GetPrefabToSpawn(i, j), GetTileSpawnPosition(i, j) + new Vector3(i * tileOffset, 0, j * tileOffset), Quaternion.identity);
+            GameObject spawnedObject = Instantiate(GetPrefabToSpawn(i, j), GetTileSpawnPosition(i, j), Quaternion.identity);
             spawnedObject.transform.SetParent(tileContainer, false);
 
-            if (tileTypeArray[i, j] == TileType.WAYPOINT)
-            {
-                SpawnWayPoint(spawnedObject.transform);
-            }
         }
 
         private GameObject GetPrefabToSpawn(int x, int y)
@@ -116,7 +116,16 @@ namespace TowerDefence.Level
         }
         private Vector3 GetTileSpawnPosition(int x, int z)
         {
-            return startPosition + new Vector3(x, 0, z);
+            Vector3 pos = (startPosition + new Vector3(x, 0, z)) + new Vector3(x * tileOffset, 0, z * tileOffset);
+            if (tileTypeArray[x, z] == TileType.WAYPOINT)
+            {
+                Debug.Log(startPosition);
+                Debug.Log(x + " " + z);
+                Debug.Log(x * tileOffset + " " + z * tileOffset);
+                Debug.Log(pos);
+            }
+
+            return pos;
         }
 
         public void CreateTileArray()
@@ -146,6 +155,7 @@ namespace TowerDefence.Level
             ResetTileArray();
             tileTypeArray = null;
             DeleteTileContainer();
+            waypoinGridPositionList.Clear();
         }
 
         private void ResetTileArray()
@@ -161,6 +171,8 @@ namespace TowerDefence.Level
                     tileTypeArray[i, j] = TileType.GRASS;
                 }
             }
+
+            waypoinGridPositionList.Clear();
         }
 
         //GETTERS
@@ -178,12 +190,24 @@ namespace TowerDefence.Level
             tileTypeArray[x, y] = tileType;
         }
 
-        public void SpawnWayPoint(Transform spawnLocation)
+        public void AddWaypointPosition(Vector3Int position)
         {
-            Vector3 position = new Vector3(spawnLocation.position.x, spawnLocation.position.y + waypointOffset, spawnLocation.position.z);
+            waypoinGridPositionList.Add(position);
+        }
+        public void SpawnWayPoint()
+        {
+            //Debug.Log(waypoinGridPositionList.Count);
+            foreach (Vector3Int pos in waypoinGridPositionList)
+            {
+                Vector3 gridWorldPosition = GetTileSpawnPosition(pos.x, pos.z);
+                Debug.Log("grid:" + gridWorldPosition);
 
-            Transform waypoint = Instantiate(waypointPrefab, position, Quaternion.identity);
-            waypoint.SetParent(waypointContainer, false);
+                Vector3 spawnPosition = new Vector3(gridWorldPosition.x, gridWorldPosition.y + waypointOffset, gridWorldPosition.z);
+                Debug.Log("grid:" + spawnPosition);
+
+                Transform waypoint = Instantiate(waypointPrefab, spawnPosition, Quaternion.identity);
+                waypoint.SetParent(waypointContainer, false);
+            }
         }
     }
 #endif

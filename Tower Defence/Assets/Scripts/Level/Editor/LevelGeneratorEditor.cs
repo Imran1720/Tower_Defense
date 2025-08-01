@@ -47,6 +47,12 @@ public class LevelGeneratorEditor : Editor
                 {
                     Undo.RecordObject(levelGenerator, "Toggle Tile Type");
                     levelGenerator.SetTileValue(i, j, tileTypeToSet);
+                    if (tileTypeToSet == TileType.WAYPOINT)
+                    {
+                        Vector3Int position = new Vector3Int(i, 0, j);
+                        Debug.Log(position);
+                        levelGenerator.AddWaypointPosition(position);
+                    }
                     EditorUtility.SetDirty(levelGenerator);
                     Repaint();
                 }
