@@ -12,24 +12,21 @@ namespace TowerDefence.Level
         [SerializeField] private Transform waypointContainerPrefab;
         [SerializeField] private Transform waypointPrefab;
         [SerializeField] private float waypointOffset;
+        [SerializeField] private float tileOffset;
 
         [Header("Tile Details")]
         [SerializeField] private TileListSO tileListSO;
 
-        private TileType[,] tileTypeArray;
+        [SerializeField, HideInInspector] private TileType[,] tileTypeArray;
         private Vector3 startPosition;
         private Vector3 startOffset;
 
-        private Transform tileContainer;
-        private Transform waypointContainer;
+        [SerializeField, HideInInspector] private Transform tileContainer;
+        [SerializeField, HideInInspector] private Transform waypointContainer;
 
         [Header("Editor Details")]
         [SerializeField] private int buttonSize;
         [SerializeField] private int brushButtonSize;
-        private void Start()
-        {
-            SpawnTiles();
-        }
 
         public void SpawnTiles()
         {
@@ -50,7 +47,7 @@ namespace TowerDefence.Level
 
         private void SpawnTile(int i, int j)
         {
-            GameObject spawnedObject = Instantiate(GetPrefabToSpawn(i, j), GetTileSpawnPosition(i, j), Quaternion.identity);
+            GameObject spawnedObject = Instantiate(GetPrefabToSpawn(i, j), GetTileSpawnPosition(i, j) + new Vector3(i * tileOffset, 0, j * tileOffset), Quaternion.identity);
             spawnedObject.transform.SetParent(tileContainer, false);
 
             if (tileTypeArray[i, j] == TileType.WAYPOINT)

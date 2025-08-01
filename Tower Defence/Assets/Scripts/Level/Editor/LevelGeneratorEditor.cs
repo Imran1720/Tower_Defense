@@ -14,6 +14,7 @@ public class LevelGeneratorEditor : Editor
     private TileType tileTypeToSet;
     private TileType currenttileType;
     private bool canHoverDraw = false;
+
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
@@ -62,7 +63,11 @@ public class LevelGeneratorEditor : Editor
         }
 
         EditorGUILayout.Space(20);
-
+        Event keyDetection = Event.current;
+        if (keyDetection.type == EventType.KeyDown && keyDetection.keyCode == KeyCode.LeftControl)
+        {
+            ToggleHoverDraw();
+        }
 
         GUI.color = Color.white;
         EditorGUILayout.BeginHorizontal();
@@ -161,7 +166,10 @@ public class LevelGeneratorEditor : Editor
         }
     }
 
-
+    private void ToggleHoverDraw()
+    {
+        canHoverDraw = !canHoverDraw;
+    }
 
     private void InitializeEditorData()
     {
