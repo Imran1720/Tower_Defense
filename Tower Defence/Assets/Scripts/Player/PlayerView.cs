@@ -6,8 +6,11 @@ public class PlayerView : MonoBehaviour
 {
     [SerializeField] private Transform cellHighlighterPrefab;
     [SerializeField] private float highlighterOffset;
+    [SerializeField] private float towerSpawnOffset;
 
     [SerializeField] private GameObject towerPrefab;
+    [SerializeField] private LayerMask grassLayerMask;
+    [SerializeField] private float maxRayDistance;
 
     private Transform cellHighlighter;
     private bool isEditModeActive = false;
@@ -17,6 +20,7 @@ public class PlayerView : MonoBehaviour
     TileView towerTile;
 
     Vector3 cellPosition;
+    Vector3 towerPosition;
 
 
     private void Start()
@@ -40,28 +44,30 @@ public class PlayerView : MonoBehaviour
             ToggleEditMode();
         }
 
-        if (Input.GetKeyUp(KeyCode.Mouse0) && isEditModeActive)
-        {
-            //Tower Placing logic
-
-            towerTile = tileView;
-            towerTile.SetTileOccupied();
-
-            Instantiate(towerPrefab, cellPosition, Quaternion.identity);
-        }
-
         if (isEditModeActive)
         {
             // Updating highlighter position
             PlaceCellHighlighter();
         }
+
+        if (Input.GetKeyUp(KeyCode.Mouse0) && isEditModeActive)
+        {
+            //Tower Placing logic
+            Debug.Log(tileView);
+            towerTile = tileView;
+            towerPosition = new Vector3(cellPosition.x, cellPosition.y + towerSpawnOffset, cellPosition.z);
+            Instantiate(towerPrefab, towerPosition, Quaternion.identity);
+            towerTile.SetTileOccupied();
+            Debug.Log(tileView);
+        }
+
     }
 
     private void PlaceCellHighlighter()
     {
         ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        if (Physics.Raycast(ray, out RaycastHit hit, maxRayDistance, grassLayerMask))
         {
             tileView = hit.collider.gameObject.GetComponent<TileView>();
             if (tileView != null && tileView.IsTileFree())
