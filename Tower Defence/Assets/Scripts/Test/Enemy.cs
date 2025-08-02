@@ -86,4 +86,5 @@ public class Enemy : MonoBehaviour
         target = checkpointList[0];
         checkpointList.RemoveAt(0);
     }
+
 }
