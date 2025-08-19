@@ -159,6 +159,7 @@ namespace TowerDefence.Level
                 EditorSceneManager.MarkSceneDirty(gameObject.scene);
             }
         }
+
         private void SetContainers()
         {
             levelContainer = gameService.GetLevelContainer();

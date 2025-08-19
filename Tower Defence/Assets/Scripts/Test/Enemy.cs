@@ -8,7 +8,6 @@ public class Enemy : MonoBehaviour
     [SerializeField] private Rigidbody rb;
     [SerializeField] private float moveSpeed;
     [SerializeField] private float rotationSpeed;
-    [SerializeField] private EnemyType enemyType;
     private List<Transform> checkpointList;
 
     private Transform target;
@@ -76,10 +75,6 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    public void TakeDamage(int amount)
-    {
-        Debug.Log($"Damage : {amount}");
-    }
     private void AssignTarget()
     {
         if (checkpointList.Count == 0)
@@ -91,7 +86,5 @@ public class Enemy : MonoBehaviour
         target = checkpointList[0];
         checkpointList.RemoveAt(0);
     }
-
-    public bool IsEnemy(EnemyType enemyType) => this.enemyType == enemyType;
 
 }

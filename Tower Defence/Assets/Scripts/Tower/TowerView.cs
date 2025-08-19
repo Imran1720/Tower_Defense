@@ -5,57 +5,32 @@ using UnityEngine;
 
 public class TowerView : MonoBehaviour
 {
-    [Header("Tower-Data")]
-    [SerializeField] private TowerDataSO towerDataSO;
     [SerializeField] private Transform towerBase;
     [SerializeField] private float rotationSpeed;
-    //[SerializeField] private int attackPower;
-    //[SerializeField] private float range;
-    //[SerializeField] private float fireRate;
+    [SerializeField] private float fireRate;
 
-    [Header("Tower-Level-Data")]
-    [SerializeField] private Transform level2Body;
-    [SerializeField] private Transform level3Body;
-    [SerializeField] private Transform level4Body;
-    [SerializeField] private Transform level5Body;
-    [SerializeField] private Transform rangeIndicator;
-
-    [Header("Bullet-Data")]
     [SerializeField] private Transform shootPoint;
-    //[SerializeField] private Bullet bulletPrefab;
-    //[SerializeField] private float bulletSpeed;
-    //[SerializeField] private float predictionTime;
+    [SerializeField] private Transform bulletPrefab;
+    [SerializeField] private float bulletSpeed;
+    [SerializeField] private float predictionTime;
 
-
-    private List<Transform> enemiesInRangeList;
-    [SerializeField] private CapsuleCollider capsuleCollider;
+    [SerializeField] private List<Transform> enemiesInRangeList;
 
     private Transform target;
+    private bool isEnemyInRange;
 
     private float timer;
     private Vector3 previousTragetPosition;
-    private LevelType currentLevel;
-    private TowerLevelData towerCurrentData;
-    private bool canShoot = false;
+
 
     private void Start()
     {
-        UpdateLevel(currentLevel);
         enemiesInRangeList = new List<Transform>();
-        ToggleBodyParts();
     }
 
     private void Update()
     {
-        if (Input.GetKeyUp(KeyCode.T))
-        {
-            currentLevel++;
-            if ((int)currentLevel >= 5)
-            {
-                currentLevel = LevelType.LEVEL_5;
-            }
-            UpdateLevel(currentLevel);
-        }
+
         if (enemiesInRangeList.Count > 0)
         {
             timer -= Time.deltaTime;
@@ -63,86 +38,34 @@ public class TowerView : MonoBehaviour
             LookAtTarget();
             Shoot();
         }
-    }
-
-    public void UpdateLevel(LevelType levelType)
-    {
-        currentLevel = levelType;
-        towerCurrentData = GetTowerData(levelType);
-
-        SetRange(towerCurrentData.range);
-
-        ToggleBodyParts();
-    }
-
-    private void SetRange(float rangeValue)
-    {
-        capsuleCollider.radius = rangeValue;
-        float scale = capsuleCollider.radius / 5;
-        rangeIndicator.transform.localScale = new Vector3(scale, 1, scale);
-    }
-
-    public TowerLevelData GetTowerData(LevelType level)
-    {
-        TowerLevelData data = towerDataSO.levelDataList.Find(tower => tower.level == level);
-        if (data == null)
-            return null;
-
-        return data;
-    }
-
-    private void ToggleBodyParts()
-    {
-        switch (currentLevel)
+        else
         {
-            case LevelType.LEVEL_1:
-            default:
-                HideAllParts();
-                break;
-            case LevelType.LEVEL_2:
-                ShowBodyPart(level2Body);
-                break;
-            case LevelType.LEVEL_3:
-                ShowBodyPart(level3Body);
-                break;
-            case LevelType.LEVEL_4:
-                ShowBodyPart(level4Body);
-                break;
-            case LevelType.LEVEL_5:
-                ShowBodyPart(level5Body);
-                break;
+            isEnemyInRange = false;
         }
-    }
-
-    private void ShowBodyPart(Transform part)
-    {
-        part.gameObject.SetActive(true);
-    }
-    private void HideAllParts()
-    {
-        level2Body.gameObject.SetActive(false);
-        level3Body.gameObject.SetActive(false);
-        level4Body.gameObject.SetActive(false);
-        level5Body.gameObject.SetActive(false);
     }
 
     private void Shoot()
     {
         Vector3 targetVelocity = (target.position - previousTragetPosition) / Time.deltaTime;
         previousTragetPosition = target.position;
-        if (timer <= 0 && canShoot)
+        if (timer <= 0)
         {
-            Bullet bullet = Instantiate(towerDataSO.bulletPrefab, shootPoint.position, Quaternion.identity);
-            bullet.InitializeData(towerCurrentData.damage, target, towerDataSO.bulletSpeed);
+            //shoot
+            Vector3 predictedPosition = target.position + targetVelocity * predictionTime;
 
-            canShoot = false;
+            Vector3 direction = (predictedPosition - shootPoint.position).normalized;
+            Vector3 velocity = direction * bulletSpeed;
+            Transform bullet = Instantiate(bulletPrefab, shootPoint.position, Quaternion.identity);
+            Rigidbody rb = bullet.GetComponent<Rigidbody>();
+            rb.AddForce(velocity, ForceMode.Impulse);
+
             ResetTimer();
         }
     }
 
     private void ResetTimer()
     {
-        timer = towerCurrentData.fireRate;
+        timer = fireRate;
     }
 
     private void LookAtTarget()
@@ -153,17 +76,7 @@ public class TowerView : MonoBehaviour
         {
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             towerBase.rotation = Quaternion.Slerp(towerBase.rotation, targetRotation, Time.deltaTime * rotationSpeed);
-            if (IsFacingTarget(targetRotation))
-            {
-                canShoot = true;
-            }
         }
-    }
-
-    private bool IsFacingTarget(Quaternion targetRotation)
-    {
-        float angle = Quaternion.Angle(towerBase.rotation, targetRotation);
-        return angle <= 15;
     }
 
     private void SetTarget()
@@ -174,9 +87,10 @@ public class TowerView : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         other.TryGetComponent<Enemy>(out Enemy enemy);
-        if (enemy != null && !enemy.IsEnemy(towerDataSO.immuneEnemyType))
+        if (enemy != null)
         {
             enemiesInRangeList.Add(enemy.transform);
+            isEnemyInRange = true;
         }
     }
 

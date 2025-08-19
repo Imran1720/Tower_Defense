@@ -4,17 +4,13 @@ using UnityEngine.UI;
 
 public class PlayerView : MonoBehaviour
 {
-    [Header("Spawn-Offset-Data")]
-    [SerializeField] private float towerSpawnOffset;
-    [SerializeField] private float highlighterOffset;
-
-    [Header("Prefabs")]
-    [SerializeField] private GameObject towerPrefab;
     [SerializeField] private Transform cellHighlighterPrefab;
+    [SerializeField] private float highlighterOffset;
+    [SerializeField] private float towerSpawnOffset;
 
-    [Header("Tile-Detection-Data")]
-    [SerializeField] private float maxRayDistance;
+    [SerializeField] private GameObject towerPrefab;
     [SerializeField] private LayerMask grassLayerMask;
+    [SerializeField] private float maxRayDistance;
 
     private Transform cellHighlighter;
     private bool isEditModeActive = false;
@@ -54,18 +50,15 @@ public class PlayerView : MonoBehaviour
             PlaceCellHighlighter();
         }
 
-        if (Input.GetKeyUp(KeyCode.Mouse0) && isEditModeActive && tileView.IsTileFree())
+        if (Input.GetKeyUp(KeyCode.Mouse0) && isEditModeActive)
         {
             //Tower Placing logic
+            Debug.Log(tileView);
             towerTile = tileView;
-            towerTile.SetTileOccupied();
             towerPosition = new Vector3(cellPosition.x, cellPosition.y + towerSpawnOffset, cellPosition.z);
             Instantiate(towerPrefab, towerPosition, Quaternion.identity);
-        }
-
-        if (Input.GetKeyUp(KeyCode.Mouse0) && !tileView.IsTileFree())
-        {
-            //Show tower range and UI to update or sell
+            towerTile.SetTileOccupied();
+            Debug.Log(tileView);
         }
 
     }
@@ -77,7 +70,7 @@ public class PlayerView : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, maxRayDistance, grassLayerMask))
         {
             tileView = hit.collider.gameObject.GetComponent<TileView>();
-            if (tileView != null)
+            if (tileView != null && tileView.IsTileFree())
             {
                 EnableCellHighlighter(true);
                 cellPosition = tileView.GetTilePosition();
