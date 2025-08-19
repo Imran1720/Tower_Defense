@@ -16,7 +16,8 @@ public class GameService : MonoBehaviour
             instance = this;
         }
     }
+
+    public List<Transform> GetWaypoints() => waypointList;
     public Transform GetLevelContainer() => levelContainer;
     public Transform GetWaypointContainer() => waypointContainer;
-    public List<Transform> GetWaypoints() => waypointList;
 }

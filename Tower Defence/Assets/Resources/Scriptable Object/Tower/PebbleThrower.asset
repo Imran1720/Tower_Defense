@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7683128d28db8f44aa5df9705fb0846a, type: 3}
+  m_Name: PebbleThrower
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: 3374403574894570657, guid: b122508d387562347b3e7ef45eb3d13c, type: 3}
+  towerPrefab: {fileID: 3389529483726780045, guid: f5abe57673b1747458cfbf6afb340749, type: 3}
+  towerDescription: Tower that shoots pebble
+  towerType: 0
+  curretLevel: 0
+  immuneEnemyType: 2
+  levelDataList:
+  - level: 0
+    damage: 10
+    range: 2.5
+    fireRate: 2
+    projectileSpeed: 2
+    damageAOE: 0
+    updateCost: 50
+    sellValue: 25
+    repairCost: 15
+  - level: 1
+    damage: 20
+    range: 2.5
+    fireRate: 1.8
+    projectileSpeed: 3
+    damageAOE: 0.5
+    updateCost: 100
+    sellValue: 60
+    repairCost: 30
+  - level: 2
+    damage: 35
+    range: 4
+    fireRate: 1.4
+    projectileSpeed: 5
+    damageAOE: 1.5
+    updateCost: 350
+    sellValue: 210
+    repairCost: 90
+  - level: 3
+    damage: 55
+    range: 4
+    fireRate: 1.4
+    projectileSpeed: 5
+    damageAOE: 1.5
+    updateCost: 350
+    sellValue: 210
+    repairCost: 90
+  - level: 4
+    damage: 80
+    range: 5
+    fireRate: 1.2
+    projectileSpeed: 6
+    damageAOE: 2
+    updateCost: 500
+    sellValue: 300
+    repairCost: 120
